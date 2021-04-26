@@ -1,2 +1,2 @@
-java -jar ministick-moves.jar
+java -jar ministick-moves.desktop.jar
 pause

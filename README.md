@@ -2,8 +2,7 @@
 
 ![alt text](https://github.com/osef-art/osef-art.github.io/blob/main/assets/thumbnails/ministick2-clip-1.gif ":D")
 
-An addictive, infinite and super-fast beat-them all.
-Let's see how far you can go !
+a quick sandbox environment made to test new moves and mechanics for **ministick.v2** !
 
 ## LAUNCH THE GAME 🎮
 You must have [**Java 11** or +](https://download.oracle.com/otn/java/jdk/13.0.2+8/d4173c853231432d94f001e99d882ca7/jdk-13.0.2_windows-x64_bin.exe)
