@@ -45,17 +45,22 @@ java -jar ministick-moves.jar
 `⬇` + `kick` : low **kick**
 
 #### ⚙ General 
-`A` : **exit** the game
+`A`, `Esc` : **exit** the game
 
 ![alt text](https://github.com/osef-art/osef-art.github.io/blob/main/assets/thumbnails/ministick2-clip-2.gif ">:D")
 
 
 ### TIPS 💡
 
-- The **star** below the player indicates that he's **ready** to chain with an attack. *(but not just anyone)*
-Try to put your attacks during these frames !
+- The **star** below the player indicates that he's
+  **ready** to chain with another attack. *(but not just anyone)*.  
+  Try putting your attacks during these frames !
+  
+- This environment is a real **sandbox**.  
+  Feel free to test **whatever you want** !
+  
 
-### COMBOS TO TRY 💥
+### COMBOS TO TRY ⭐
 
 `1`: `➡`**punch** , `➡`**kick** , `➡`**punch**
   
@@ -71,9 +76,11 @@ Try to put your attacks during these frames !
 
 `7`: `⬇`**kick** , `⬇`**punch** , jump + **punch**
 
-`8`: `➡`**punch** *x 2*
+`8`: `⬇`**kick** , `⬇`**punch** , jump + **kick**
 
-`9`: `➡`**kick** , **kick**
+`9`: `➡`**punch** *x 2*
+
+`10`: `➡`**kick** , **kick**
 
 
 ![alt text](https://github.com/osef-art/osef-art.github.io/blob/main/assets/thumbnails/ministick2-clip-3.gif "21 Combo !")
