@@ -3,29 +3,28 @@ package com.mygdx.moves.controller;
 import com.badlogic.gdx.InputProcessor;
 import com.mygdx.moves.world.Ministick;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class Controller implements InputProcessor {
     public enum Key {
-        LEFT_KEY(21),
-        RIGHT_KEY(22),
-        UP_KEY(19),
-        DOWN_KEY(20),
-        PUNCH_KEY(31),
-        KICK_KEY(50),
+        LEFT_KEY(21, 45),
+        RIGHT_KEY(22, 32),
+        UP_KEY(19, 54),
+        DOWN_KEY(20, 47),
+        PUNCH_KEY(31, 40),
+        KICK_KEY(50, 41),
         ;
 
-        private final int code;
+        private final List<Integer> keys = new ArrayList<>();
 
-        Key(int code) {
-            this.code = code;
+        Key(int code, int alt) {
+            keys.add(code);
+            keys.add(alt);
         }
 
         static Optional<Key> ofCode(int code) {
-            return Arrays.stream(values()).filter(k -> k.code == code).findFirst();
+            return Arrays.stream(values()).filter(k -> k.keys.contains(code)).findFirst();
         }
     }
     private final Ministick actor;
@@ -44,7 +43,7 @@ public class Controller implements InputProcessor {
         pressed.put(keycode, true);
 
         // GAME
-        if (keycode == 45) { // Q
+        if (keycode == 29 || keycode == 131) { // Q, ESC
             System.exit(0);
         }
 
@@ -97,7 +96,7 @@ public class Controller implements InputProcessor {
     }
 
     public boolean isPressed(Key ... keys) {
-        return Arrays.stream(keys).anyMatch(k -> pressed.get(k.code));
+        return Arrays.stream(keys).anyMatch(key -> key.keys.stream().anyMatch(pressed::get));
     }
 
     @Override
