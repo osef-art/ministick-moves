@@ -17,11 +17,11 @@ public class Ministick extends Object {
     private final Sprite star = new Sprite(new Texture("android/assets/icons/star.png"));
     private AnimatedSprite sprite;
     private boolean lookingLeft;
-    private StateRecord state;
+    private State state;
 
     public Ministick() {
         super(240, ground.y,120, 120, 1);
-        setState(StateRecord.IDLE);
+        setState(State.IDLE);
         star.flip(false, true);
     }
 
@@ -29,15 +29,15 @@ public class Ministick extends Object {
         return lookingLeft;
     }
 
-    private boolean stateIs(StateRecord... states) {
+    private boolean stateIs(State... states) {
         return Arrays.stream(states).anyMatch(s -> s == state);
     }
 
-    private boolean stateIsNot(StateRecord... states) {
+    private boolean stateIsNot(State... states) {
         return Arrays.stream(states).noneMatch(s -> s == state);
     }
 
-    private void setState(StateRecord state) {
+    private void setState(State state) {
         if (state == this.state) return;
         this.state = state;
         sprite = state.sprite();
@@ -68,13 +68,14 @@ public class Ministick extends Object {
     }
 
     private void move(boolean left) {
-        if (stateIs(StateRecord.CLINGING)) return;
-        if (!state.isAttack() && stateIsNot(StateRecord.WALL_JUMP)) turnBack(left);
+        if (stateIs(State.CLINGING)) return;
+        if (!state.isAttack() && stateIsNot(State.WALL_JUMP)) turnBack(left);
 
         switch (state) {
             case FALLING:
             case WALL_JUMP:
             case AIR_SMASH:
+            case ACTIVE_FALLING:
                 super.addAcc((left ? -1 : 1) * 0.5f, 0);
                 break;
             case JUMP:
@@ -96,11 +97,11 @@ public class Ministick extends Object {
     }
 
     public void walk() {
-        if (stateIs(StateRecord.IDLE)) setState(StateRecord.RUNNING);
+        if (stateIs(State.IDLE)) setState(State.RUNNING);
     }
 
     public void stopWalking() {
-        if (stateIs(StateRecord.RUNNING)) setState(StateRecord.IDLE);
+        if (stateIs(State.RUNNING)) setState(State.IDLE);
     }
 
     public void jump() {
@@ -108,21 +109,22 @@ public class Ministick extends Object {
 
         switch (state) {
             case JUMP:
-            case WALL_JUMP:
             case FALLING:
+            case WALL_JUMP:
+            case ACTIVE_FALLING:
                 return;
             case CLINGING:
                 stream.play("jump");
-                setState(StateRecord.WALL_JUMP);
+                setState(State.WALL_JUMP);
                 lookingLeft = !lookingLeft;
-                addXAcc(10);
+                addXAcc(15);
                 addX((int) size.x / 4);
                 setYAcc(-20);
                 break;
             default:
                 stream.play("jump");
                 addAcc(0, -30);
-                setState(StateRecord.JUMP);
+                setState(State.JUMP);
         }
     }
 
@@ -131,15 +133,14 @@ public class Ministick extends Object {
         switch (state) {
             case IDLE:
             case RUNNING:
-                setState(StateRecord.SQUAT);
+                setState(State.SQUAT);
         }
     }
 
     public void getUp() {
         if (!sprite.hasExceeded(state.comboWindow())) return;
-        switch (state) {
-            case SQUATTING:
-                setState(StateRecord.GET_UP);
+        if (state == State.SQUATTING) {
+            setState(State.GET_UP);
         }
     }
 
@@ -151,22 +152,23 @@ public class Ministick extends Object {
         switch (state) {
             case JUMP:
             case WALL_JUMP:
+            case ACTIVE_FALLING:
                 setYAcc(-20);
-                setState(StateRecord.AIR_UPPERCUT);
+                setState(State.AIR_UPPERCUT);
                 break;
             case LOW_KICK:
             case ROTATING_KICK:
-                setState(StateRecord.REVERSE_PUNCH);
+                setState(State.REVERSE_PUNCH);
                 break;
             case REVERSE_PUNCH:
-                setState(StateRecord.ENHANCED_PUNCH);
+                setState(State.ENHANCED_PUNCH);
                 break;
             case IDLE:
             case SIDE_KICK:
-                setState(StateRecord.PUNCH);
+                setState(State.PUNCH);
                 break;
             case MID_KICK:
-                setState(StateRecord.SLIDING_UPPERCUT);
+                setState(State.SLIDING_UPPERCUT);
         }
         stream.play("whoosh");
     }
@@ -187,24 +189,25 @@ public class Ministick extends Object {
         switch (state) {
             case JUMP:
             case WALL_JUMP:
+            case ACTIVE_FALLING:
                 setYAcc(-20);
-                setState(StateRecord.AIR_UPPERCUT);
+                setState(State.AIR_UPPERCUT);
                 break;
             case RUNNING:
             case IDLE:
             case SIDE_KICK:
             case REVERSE_PUNCH:
-                setState(StateRecord.ENHANCED_PUNCH);
+                setState(State.ENHANCED_PUNCH);
                 break;
             case ENHANCED_PUNCH:
-                setState(StateRecord.DOUBLE_PUNCH);
+                setState(State.DOUBLE_PUNCH);
                 break;
             case MID_KICK:
-                setState(StateRecord.SLIDING_UPPERCUT);
+                setState(State.SLIDING_UPPERCUT);
                 break;
             case LOW_KICK:
             case ROTATING_KICK:
-                setState(StateRecord.REVERSE_PUNCH);
+                setState(State.REVERSE_PUNCH);
                 break;
         }
     }
@@ -216,13 +219,13 @@ public class Ministick extends Object {
         switch (state) {
             case JUMP:
             case WALL_JUMP:
-                setState(StateRecord.AIR_SMASH);
+                setState(State.AIR_SMASH);
                 setYAcc(isFalling() ? -15 : -10);
                 break;
             case SQUAT:
             case SWEEPER:
             case SQUATTING:
-                setState(StateRecord.UPPERCUT);
+                setState(State.UPPERCUT);
         }
     }
 
@@ -234,20 +237,20 @@ public class Ministick extends Object {
             case JUMP:
             case WALL_JUMP:
                 addAcc(0, -5);
-                setState(StateRecord.AIR_KICK);
+                setState(State.AIR_KICK);
                 break;
             case ENHANCED_PUNCH:
-                setState(StateRecord.BACKUP_KICK);
+                setState(State.BACKUP_KICK);
                 break;
             case BACKUP_KICK:
-                setState(StateRecord.BACKUP_KICK_2);
+                setState(State.BACKUP_KICK_2);
                 break;
             case IDLE:
-                setState(StateRecord.LOW_KICK);
+                setState(State.LOW_KICK);
                 break;
             case SIDE_KICK:
                 addXAcc(5);
-                setState(StateRecord.BACK_KICK);
+                setState(State.BACK_KICK);
         }
     }
 
@@ -268,14 +271,14 @@ public class Ministick extends Object {
             case JUMP:
             case WALL_JUMP:
                 addAcc(0, -5);
-                setState(StateRecord.AIR_KICK);
+                setState(State.AIR_KICK);
                 break;
             case ENHANCED_PUNCH:
-                setState(StateRecord.MID_KICK);
+                setState(State.MID_KICK);
                 break;
             case RUNNING:
             case IDLE:
-                setState(StateRecord.SIDE_KICK);
+                setState(State.SIDE_KICK);
         }
     }
 
@@ -288,11 +291,11 @@ public class Ministick extends Object {
             case IDLE:
             case SQUATTING:
                 addXAcc(1);
-                setState(StateRecord.SWEEPER);
+                setState(State.SWEEPER);
                 break;
             case ENHANCED_PUNCH:
                 addAcc(2.5f, -10);
-                setState(StateRecord.ROTATING_KICK);
+                setState(State.ROTATING_KICK);
         }
     }
 
@@ -308,17 +311,17 @@ public class Ministick extends Object {
             acceleration.y = 1;
         }
         acceleration.x *= 0.9;
-        acceleration.y *= isFalling() ? 1.1 : 0.9;
-        acceleration.y += (stateIs(StateRecord.CLINGING) ? 0.1f : 0.5f) * weight;
+        acceleration.y *= isFalling() ? 1.01/*1.1*/ : 0.9;
+        acceleration.y += (stateIs(State.CLINGING) ? 0.1f : 0.5f) * weight;
     }
 
     void cling() {
         if (position.x < leftWall.x + size.x / 4 + leftWall.width) {
-            if (position.y < ground.y && stateIs(StateRecord.JUMP, StateRecord.FALLING)) setState(StateRecord.CLINGING);
+            if (position.y < ground.y && stateIs(State.JUMP, State.FALLING, State.ACTIVE_FALLING)) setState(State.CLINGING);
             position.x = leftWall.x + size.x / 4 + leftWall.width;
         }
         if (position.x > rightWall.x - size.x / 4) {
-            if (position.y < ground.y && stateIs(StateRecord.JUMP, StateRecord.FALLING)) setState(StateRecord.CLINGING);
+            if (position.y < ground.y && stateIs(State.JUMP, State.FALLING, State.ACTIVE_FALLING)) setState(State.CLINGING);
             position.x = rightWall.x - size.x / 4;
         }
     }
@@ -332,18 +335,18 @@ public class Ministick extends Object {
                 acceleration.y = 0;
             }
 
-            if (stateIs(StateRecord.JUMP, StateRecord.FALLING)) {
-                setState(StateRecord.GET_UP);
-            } else if (stateIs(StateRecord.CLINGING)) {
+            if (stateIs(State.JUMP, State.FALLING, State.ACTIVE_FALLING, State.AIR_KICK, State.AIR_UPPERCUT)) {
+                setState(State.GET_UP);
+            } else if (stateIs(State.CLINGING)) {
                 lookingLeft = !lookingLeft;
                 addX(5);
-                setState(StateRecord.GET_UP);
+                setState(State.GET_UP);
             }
         }
     }
 
     private void triggerHitbox() {
-        StateRecord.attacks().forEach(s -> {
+        State.attacks().forEach(s -> {
             if (state == s && sprite.frame() == s.hitFrame()) {
                 addHitbox(s.hitbox(this));
             }
@@ -386,38 +389,41 @@ public class Ministick extends Object {
 
         switch (state) {
             case LOW_KICK:
-                setState(StateRecord.NEUTRAL_KICK_EASE);
+                setState(State.LOW_KICK_EASE);
                 break;
             case ENHANCED_PUNCH:
             case PUNCH:
-                setState(StateRecord.NEUTRAL_PUNCH_EASE);
+                setState(State.PUNCH_EASE);
                 break;
             case DOUBLE_PUNCH:
-                setState(StateRecord.SIDE_PUNCH_2_EASE);
+                setState(State.DOUBLE_PUNCH_EASE);
                 break;
             case BACKUP_KICK:
-                setState(StateRecord.BACK_KICK_EASE);
+                setState(State.BACKUP_KICK_EASE);
                 break;
             case ROTATING_KICK:
-                setState(StateRecord.SPINNING_LOW_KICK_EASE);
+                setState(State.ROTATING_KICK_EASE);
                 break;
             case BACK_KICK:
-                setState(StateRecord.BACK_KICK_2_EASE);
+                setState(State.BACK_KICK_EASE);
                 break;
 
-            case JUMP:
             case WALL_JUMP:
+                cling();
+                setState(isLanded() ? State.GET_UP : State.ACTIVE_FALLING);
+                break;
+            case JUMP:
             case AIR_UPPERCUT:
             case AIR_SMASH:
-                setState(isLanded() ? StateRecord.GET_UP : StateRecord.FALLING);
                 cling();
+                setState(isLanded() ? State.GET_UP : State.FALLING);
                 break;
             case SQUAT:
             case SWEEPER:
-                setState(controller.isPressed(Controller.Key.DOWN_KEY) ? StateRecord.SQUATTING : StateRecord.GET_UP);
+                setState(controller.isPressed(Controller.Key.DOWN_KEY) ? State.SQUATTING : State.GET_UP);
                 break;
             case IDLE:
-                setState(controller.isPressed(Controller.Key.UP_KEY) ? StateRecord.JUMP : StateRecord.IDLE);
+                setState(controller.isPressed(Controller.Key.UP_KEY) ? State.JUMP : State.IDLE);
                 break;
             case BACKUP_KICK_2:
                 addX(25);
@@ -434,14 +440,14 @@ public class Ministick extends Object {
         }
     }
 
-    private StateRecord landingState() {
+    private State landingState() {
         if (controller.isPressed(Controller.Key.DOWN_KEY)) {
-            return StateRecord.SQUAT;
+            return State.SQUAT;
         }
         else if (controller.isPressed(Controller.Key.LEFT_KEY, Controller.Key.RIGHT_KEY)) {
-            return StateRecord.RUNNING;
+            return State.RUNNING;
         }
-        return StateRecord.IDLE;
+        return State.IDLE;
     }
 
     @Override

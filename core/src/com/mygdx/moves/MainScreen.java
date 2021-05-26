@@ -7,7 +7,9 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.mygdx.moves.controller.Controller;
 import com.mygdx.moves.renderer.ShapeRendererAdaptor;
 import com.mygdx.moves.renderer.SpriteRendererAdaptor;
+import com.mygdx.moves.world.State;
 import com.mygdx.moves.world.World;
+
 
 public class MainScreen extends ApplicationAdapter {
 	public static OrthographicCamera camera;
@@ -19,6 +21,7 @@ public class MainScreen extends ApplicationAdapter {
 
 	@Override
 	public void create () {
+		State.elaborateMovesAutomata();
 		camera = new OrthographicCamera();
 		camera.setToOrtho(true);
 
