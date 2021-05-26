@@ -5,7 +5,7 @@
 a quick sandbox environment made to test new moves and mechanics for **ministick.v2** !
 
 ## LAUNCH THE GAME 🎮
-You must have [**Java 11** or +](https://download.oracle.com/otn/java/jdk/13.0.2+8/d4173c853231432d94f001e99d882ca7/jdk-13.0.2_windows-x64_bin.exe)
+⚠ You must have [**Java 11** or +](https://www.oracle.com/java/technologies/javase/jdk11-archive-downloads.html)
 installed to play the game.
 
 #### WINDOWS
@@ -55,8 +55,10 @@ java -jar ministick-moves.jar
   **ready** to chain with another attack. *(but not just anyone)*.  
   Try putting your attacks during these frames !
   
-- This environment is a real **sandbox**.  
-  Feel free to test **whatever you want** !
+- This environment is a real **sandbox**. Feel free to try **whatever you want** !
+
+- If you notice any weird behavior, don't hesitate to [**contact** me](mailto:sirosef@gmail.com)
+and describe the problem. It really helps ! ✨
   
 
 ### COMBOS TO TRY ⭐
@@ -65,7 +67,7 @@ java -jar ministick-moves.jar
   
 `2`: `➡`**punch** , **kick** *x 2*
   
-`3`: `➡`**punch** , `⬇`**kick** 
+`3`: `➡`**punch** , `⬇`**kick** , **punch**
 
 `4`: **kick** , **punch** *x 2*
 
