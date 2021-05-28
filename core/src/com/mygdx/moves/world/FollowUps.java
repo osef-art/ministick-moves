@@ -1,9 +1,9 @@
 package com.mygdx.moves.world;
 
 import java.util.EnumMap;
+import java.util.stream.Stream;
 
 public class FollowUps {
-
     enum MoveInput {
         NONE,
         JUMP,
@@ -25,6 +25,10 @@ public class FollowUps {
 
     public static FollowUps empty() {
         return new FollowUps();
+    }
+
+    public Stream<State> stream() {
+        return states.values().stream();
     }
 
     public void isEase() {

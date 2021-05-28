@@ -46,7 +46,7 @@ public class World implements Animated {
         sra.drawRect(ground.x, ground.y - 5, ground.width, ground.height, Color.GRAY);
         sra.drawRect(leftWall, Color.GRAY);
         sra.drawRect(rightWall, Color.GRAY);
-        hitboxes.forEach(Hitbox::render);
+//        hitboxes.forEach(Hitbox::render);
         ministick.render();
         box.render();
     }

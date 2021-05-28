@@ -84,7 +84,6 @@ public class Ministick extends Object {
             case AIR_UPPERCUT:
                 super.addAcc((left ? -1 : 1), 0);
                 break;
-            default:
         }
     }
 

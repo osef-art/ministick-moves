@@ -4,6 +4,8 @@ import com.mygdx.moves.renderer.AnimatedSprite;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public enum State {
@@ -62,8 +64,6 @@ public enum State {
     // TODO: GROUND_POUND
     ;
 
-
-
     private final FollowUps followUps = FollowUps.empty();
     private final RelativeHitbox hitbox;
     private final int comboWindow;
@@ -71,7 +71,6 @@ public enum State {
     private final int nbFrames;
     private final double speed;
     private final String path;
-
 
     State(String path, double speed, int frames) {
         this(path, speed, frames, -1);
@@ -82,8 +81,8 @@ public enum State {
     }
 
     State(String path, double speed, int frames, int hitFrame, int window, RelativeHitbox hitbox) {
-        this.path = "android/assets/sprites/" + path;
         nbFrames = frames;
+        this.path = "android/assets/sprites/" + path;
         this.comboWindow = window;
         this.hitFrame = hitFrame;
         this.hitbox = hitbox;
@@ -104,7 +103,7 @@ public enum State {
 
         CLINGING.followUps
           .onJump(WALL_JUMP)
-          .isAerial()
+          .onRelease(ACTIVE_FALLING)
         ;
 
         ACTIVE_FALLING.followUps
@@ -147,7 +146,7 @@ public enum State {
           .onPunch(AIR_UPPERCUT)
           .onKick(AIR_KICK)
           .onDownPunch(AIR_SMASH)
-          .isAerial()
+          .onRelease(FALLING)
         ;
 
         WALL_JUMP.followUps
@@ -183,9 +182,10 @@ public enum State {
 
         AIR_SMASH.followUps.isAerial();
 
-
         // KICKS
-        LOW_KICK.followUps.onRelease(LOW_KICK_EASE);
+        LOW_KICK.followUps
+          .onSidePunch(REVERSE_PUNCH)
+          .onRelease(LOW_KICK_EASE);
 
         SIDE_KICK.followUps
           .onSideKick(BACK_KICK)
@@ -202,6 +202,7 @@ public enum State {
         ROTATING_KICK.followUps.onRelease(ROTATING_KICK_EASE);
 
         BACKUP_KICK.followUps
+          .onKick(BACKUP_KICK_2)
           .onDownKick(ROTATING_KICK)
           .onRelease(BACKUP_KICK_EASE)
         ;
@@ -235,7 +236,18 @@ public enum State {
           .filter(s -> s.followUps.isEmpty())
           .findFirst()
           .ifPresent(s -> {
-              throw new IllegalStateException(s + " isn't attached to any state !");
+              throw new IllegalStateException(s + " is not used !");
+          });
+
+        Set<State> accessibleStates = Arrays.stream(State.values())
+                                        .flatMap((state -> state.followUps.stream()))
+                                        .collect(Collectors.toUnmodifiableSet());
+
+        Arrays.stream(State.values())
+          .filter(s -> !accessibleStates.contains(s) && !Objects.equals(CLINGING, s))
+          .findFirst()
+          .ifPresent(s -> {
+              throw new IllegalStateException(s + " is not accessible by any state !");
           });
     }
 
