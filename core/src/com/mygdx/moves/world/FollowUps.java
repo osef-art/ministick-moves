@@ -31,12 +31,18 @@ public class FollowUps {
         return states.values().stream();
     }
 
+    public State on(MoveInput move) {
+        return states.get(move);
+    }
+
     public void isEase() {
         onRelease(State.IDLE);
     }
 
     public void isAerial() {
-        onRelease(State.GET_UP);
+        states.putIfAbsent(MoveInput.SIDE_PUNCH, states.get(MoveInput.PUNCH));
+        states.putIfAbsent(MoveInput.SIDE_KICK, states.get(MoveInput.KICK));
+        onRelease(State.FALLING);
     }
 
     public void onRelease(State state) {

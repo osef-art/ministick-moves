@@ -6,7 +6,7 @@ import com.mygdx.moves.world.Ministick;
 import java.util.*;
 import java.util.stream.IntStream;
 
-public class Controller implements InputProcessor {
+public class InputHandler implements InputProcessor {
     public enum Key {
         LEFT_KEY(21, 45),
         RIGHT_KEY(22, 32),
@@ -30,7 +30,7 @@ public class Controller implements InputProcessor {
     private final Ministick actor;
     private final HashMap<Integer, Boolean> pressed = new HashMap<>();
 
-    public Controller(Ministick ministick) {
+    public InputHandler(Ministick ministick) {
         this.actor = ministick;
 
         IntStream.range(0, 100)
@@ -52,10 +52,10 @@ public class Controller implements InputProcessor {
             switch (k) {
                 case LEFT_KEY:
                 case RIGHT_KEY:
-                    actor.walk();
+                    actor.startRunning();
                     break;
                 case UP_KEY:
-                    actor.jump();
+                    actor.startJumping();
                     break;
                 case DOWN_KEY:
                     actor.squat();
@@ -85,9 +85,12 @@ public class Controller implements InputProcessor {
             switch (k) {
                 case LEFT_KEY:
                 case RIGHT_KEY:
-                    actor.stopWalking();
+                    actor.stopRunning();
                     break;
-                case DOWN_KEY: // down
+                case UP_KEY:
+                    actor.stopJumping();
+                    break;
+                case DOWN_KEY:
                     actor.getUp();
                     break;
             }

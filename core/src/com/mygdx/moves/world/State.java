@@ -2,17 +2,14 @@ package com.mygdx.moves.world;
 
 import com.mygdx.moves.renderer.AnimatedSprite;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public enum State {
         // IDLE
+    IDLE("stand", 100_000_000, 6),
     CLINGING("clinging", 500_000_000, 2),
     RUNNING("walking", 50_000_000, 6),
-    IDLE("stand", 100_000_000, 6),
     FALLING("falling", 75_000_000, 4),
     ACTIVE_FALLING("falling", 100_000_000, 1), // tmp
     SQUATTING("squatting", 75_000_000, 8),
@@ -25,13 +22,13 @@ public enum State {
     JUMP("jumping", 100_000_000, 6, 0),
 
     // EASE
-    ROTATING_KICK_EASE("splkick-e", 25_000_000, 6, 6),
-    DOUBLE_PUNCH_EASE("s2punch-e", 25_000_000, 4, 4),
-    BACKUP_KICK_EASE("backkick-e", 25_000_000, 6, 6),
-    BACK_KICK_EASE("2backkick-e", 25_000_000, 6, 6),
-    LOW_KICK_EASE("nkick-e", 25_000_000, 6, 6),
-    PUNCH_EASE("npunch-e", 25_000_000, 6, 6),
-    GET_UP("getup", 30_000_000, 4, 0),
+    ROTATING_KICK_EASE("splkick-e", 25_000_000, 6, true),
+    DOUBLE_PUNCH_EASE("s2punch-e", 25_000_000, 4, true),
+    BACKUP_KICK_EASE("backkick-e", 25_000_000, 6, true),
+    BACK_KICK_EASE("2backkick-e", 25_000_000, 6, true),
+    LOW_KICK_EASE("nkick-e", 25_000_000, 6, true),
+    PUNCH_EASE("npunch-e", 25_000_000, 6, true),
+    GET_UP("getup", 30_000_000, 4, true),
     SQUAT("squat", 25_000_000, 8, 0),
     // TODO: SLIDE
 
@@ -76,6 +73,10 @@ public enum State {
         this(path, speed, frames, -1);
     }
 
+    State(String path, double speed, int frames, boolean easing) {
+        this(path, speed, frames, -1, frames, null);
+    }
+
     State(String path, double speed, int frames, int window) {
         this(path, speed, frames, -1, window, null);
     }
@@ -106,13 +107,6 @@ public enum State {
           .onRelease(ACTIVE_FALLING)
         ;
 
-        ACTIVE_FALLING.followUps
-          .onPunch(AIR_UPPERCUT)
-          .onKick(AIR_KICK)
-          .onDownPunch(AIR_SMASH)
-          .isAerial()
-        ;
-
         RUNNING.followUps
           .onDown(SQUAT)
           .onJump(JUMP)
@@ -124,34 +118,36 @@ public enum State {
         SQUATTING.followUps
           .onDownPunch(UPPERCUT)
           .onDownKick(SWEEPER)
-          .isAerial()
+          .onRelease(GET_UP);
         ;
 
-        FALLING.followUps.isAerial();
-
         ACTIVE_FALLING.followUps
-          .onPunch(AIR_UPPERCUT)
           .onKick(AIR_KICK)
+          .onPunch(AIR_UPPERCUT)
           .onDownPunch(AIR_SMASH)
           .isAerial()
         ;
+
+        FALLING.followUps.onRelease(GET_UP);
 
         // MOVES
         SQUAT.followUps
+          .onDownPunch(UPPERCUT)
+          .onDownKick(SWEEPER)
           .onDown(SQUATTING)
-          .isAerial()
+          .onRelease(GET_UP);
         ;
 
         JUMP.followUps
-          .onPunch(AIR_UPPERCUT)
           .onKick(AIR_KICK)
+          .onPunch(AIR_UPPERCUT)
           .onDownPunch(AIR_SMASH)
-          .onRelease(FALLING)
+          .isAerial();
         ;
 
         WALL_JUMP.followUps
-          .onPunch(AIR_UPPERCUT)
           .onKick(AIR_KICK)
+          .onPunch(AIR_UPPERCUT)
           .onDownPunch(AIR_SMASH)
           .isAerial()
         ;
@@ -184,6 +180,7 @@ public enum State {
 
         // KICKS
         LOW_KICK.followUps
+          .onPunch(REVERSE_PUNCH)
           .onSidePunch(REVERSE_PUNCH)
           .onRelease(LOW_KICK_EASE);
 
@@ -193,7 +190,8 @@ public enum State {
         ;
 
         MID_KICK.followUps
-          .onSidePunch(SLIDING_UPPERCUT)
+          .onPunch(SLIDING_UPPERCUT)
+          .onDownPunch(SLIDING_UPPERCUT)
           .onRelease(IDLE)
         ;
 
@@ -209,7 +207,9 @@ public enum State {
 
         BACKUP_KICK_2.followUps.onRelease(IDLE);
 
-        SWEEPER.followUps.onRelease(SQUATTING);
+        SWEEPER.followUps
+          .onDownPunch(UPPERCUT)
+          .onRelease(SQUATTING);
 
         AIR_KICK.followUps.isAerial();
 
@@ -241,7 +241,7 @@ public enum State {
 
         Set<State> accessibleStates = Arrays.stream(State.values())
                                         .flatMap((state -> state.followUps.stream()))
-                                        .collect(Collectors.toUnmodifiableSet());
+                                        .collect(Collectors.toSet());
 
         Arrays.stream(State.values())
           .filter(s -> !accessibleStates.contains(s) && !Objects.equals(CLINGING, s))
@@ -253,6 +253,10 @@ public enum State {
 
     public boolean isAttack() {
         return hitFrame != -1;
+    }
+
+    public boolean isEasing() {
+        return nbFrames == comboWindow;
     }
 
     public AnimatedSprite sprite() {
@@ -282,5 +286,8 @@ public enum State {
           hitbox.width(), hitbox.height(),
           hitbox.vx() * s.dir(), hitbox.vy()
         );
+    }
+    public Optional<State> getStateOn(FollowUps.MoveInput move) {
+        return Optional.ofNullable(followUps.on(move));
     }
 }

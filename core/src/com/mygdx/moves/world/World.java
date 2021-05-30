@@ -3,12 +3,12 @@ package com.mygdx.moves.world;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
-import com.mygdx.moves.controller.Controller;
+import com.mygdx.moves.controller.InputHandler;
 import com.mygdx.moves.renderer.Animated;
 
 import java.util.ArrayList;
 
-import static com.mygdx.moves.MainScreen.controller;
+import static com.mygdx.moves.MainScreen.inputHandler;
 import static com.mygdx.moves.MainScreen.sra;
 
 public class World implements Animated {
@@ -20,8 +20,8 @@ public class World implements Animated {
     private final Object box = new Object(280, 240, 50, 50, 0.25f);
 
     public World() {
-        controller = new Controller(ministick);
-        Gdx.input.setInputProcessor(controller);
+        inputHandler = new InputHandler(ministick);
+        Gdx.input.setInputProcessor(inputHandler);
     }
 
     public static void addHitbox(Hitbox hitbox) {
