@@ -30,11 +30,11 @@ public class Ministick extends Object {
         return lookingLeft;
     }
 
-    private boolean stateIs(State... states) {
+    private boolean stateIs(State ... states) {
         return Arrays.stream(states).anyMatch(s -> s == state);
     }
 
-    private boolean stateIsNot(State... states) {
+    private boolean stateIsNot(State ... states) {
         return Arrays.stream(states).noneMatch(s -> s == state);
     }
 
@@ -44,14 +44,25 @@ public class Ministick extends Object {
         sprite = state.sprite();
     }
 
-    private void setToFollowingStateOn(FollowUps.MoveInput move) {
-        if (sprite.hasExceeded(state.comboWindow()))
-            state.getStateOn(move).ifPresent(this::setState);
+    private boolean setToStateFollowing(FollowUps.MoveInput move) {
+        if (state.getStateFollowing(move).isPresent()) {
+            setState(state.getStateFollowing(move).get());
+            return true;
+        }
+        state.getStateFollowing(FollowUps.MoveInput.NONE).ifPresent(this::setState);
+        return false;
     }
 
-    private void setToFollowingStateOn(FollowUps.MoveInput move, String soundName) {
-        setToFollowingStateOn(move);
-        stream.play(soundName);
+    private boolean setToStateFollowingIfOver(FollowUps.MoveInput move) {
+        return sprite.hasExceeded(state.comboWindow()) && setToStateFollowing(move);
+    }
+
+    private boolean setToStateFollowingIfOver(FollowUps.MoveInput move, String soundName) {
+        if (setToStateFollowingIfOver(move)) {
+            stream.play(soundName);
+            return true;
+        }
+        return false;
     }
 
     int dir() {
@@ -104,6 +115,22 @@ public class Ministick extends Object {
         }
     }
 
+    private void jump() {
+        if (stateIs(State.JUMP, State.WALL_JUMP)) return;
+        setToStateFollowingIfOver(FollowUps.MoveInput.JUMP, "jump");
+
+        switch (state) {
+            case WALL_JUMP:
+                lookingLeft = !lookingLeft;
+                setYAcc(-20);
+                addXAcc(15);
+                addX((int) size.x / 4);
+                break;
+            case JUMP:
+                addAcc(0, -30);
+        }
+    }
+
     public void moveLeft() {
         moveX(true);
     }
@@ -145,8 +172,9 @@ public class Ministick extends Object {
     // attacks
 
     public void punch() {
-        setToFollowingStateOn(FollowUps.MoveInput.PUNCH, "whoosh");
+        if (!setToStateFollowingIfOver(FollowUps.MoveInput.PUNCH, "whoosh")) return;
 
+        // if state has changed
         if (stateIs(State.AIR_UPPERCUT)) {
             setYAcc(-20);
         }
@@ -154,7 +182,7 @@ public class Ministick extends Object {
 
     private void sidePunch(boolean left) {
         turnBack(left);
-        setToFollowingStateOn(FollowUps.MoveInput.SIDE_PUNCH, "whoosh");
+        setToStateFollowingIfOver(FollowUps.MoveInput.SIDE_PUNCH, "whoosh");
 
         if (stateIs(State.AIR_UPPERCUT)) {
             setYAcc(-20);
@@ -162,7 +190,7 @@ public class Ministick extends Object {
     }
 
     public void downPunch() {
-        setToFollowingStateOn(FollowUps.MoveInput.DOWN_PUNCH, "whoosh");
+        setToStateFollowingIfOver(FollowUps.MoveInput.DOWN_PUNCH, "whoosh");
 
         if (stateIs(State.AIR_SMASH)) {
             setYAcc(isFalling() ? -15 : -10);
@@ -170,7 +198,7 @@ public class Ministick extends Object {
     }
 
     public void kick() {
-        setToFollowingStateOn(FollowUps.MoveInput.KICK, "whoosh");
+        setToStateFollowingIfOver(FollowUps.MoveInput.KICK, "whoosh");
 
         switch (state) {
             case AIR_KICK:
@@ -183,22 +211,21 @@ public class Ministick extends Object {
 
     private void sideKick(boolean left) {
         turnBack(left);
-        setToFollowingStateOn(FollowUps.MoveInput.SIDE_KICK, "whoosh");
+        setToStateFollowingIfOver(FollowUps.MoveInput.SIDE_KICK, "whoosh");
 
-        if (stateIs(State.AIR_KICK)) {
+        if (stateIs(State.AIR_KICK))
             addAcc(0, -5);
-        }
     }
 
     public void downKick() {
-        setToFollowingStateOn(FollowUps.MoveInput.DOWN_KICK, "whoosh");
+        setToStateFollowingIfOver(FollowUps.MoveInput.DOWN_KICK, "whoosh");
 
         switch (state) {
             case SWEEPER:
                 addXAcc(1);
                 break;
             case ROTATING_KICK:
-                addAcc(2.5f, -10);
+                addAcc(2.5f, -0);
         }
     }
 
@@ -255,7 +282,8 @@ public class Ministick extends Object {
             }
 
             if (stateIs(State.JUMP, State.FALLING, State.ACTIVE_FALLING, State.AIR_KICK, State.AIR_UPPERCUT)) {
-                setState(State.GET_UP);
+                setState(goingDown ? State.SQUAT : State.GET_UP);
+                if (jumping) jump();
             } else if (stateIs(State.CLINGING)) {
                 lookingLeft = !lookingLeft;
                 addX(5);
@@ -266,7 +294,7 @@ public class Ministick extends Object {
 
     private void triggerHitbox() {
         State.attacks().forEach(s -> {
-            if (state == s && sprite.frame() == s.hitFrame()) {
+            if (stateIs(s) && sprite.frame() == s.hitFrame()) {
                 addHitbox(s.hitbox(this));
             }
         });
@@ -306,67 +334,30 @@ public class Ministick extends Object {
     private void updateState() {
         if (!sprite.isOver()) return;
 
-        switch (state) {
-            case LOW_KICK:
-                setState(State.LOW_KICK_EASE);
-                break;
-            case ENHANCED_PUNCH:
-            case PUNCH:
-                setState(State.PUNCH_EASE);
-                break;
-            case DOUBLE_PUNCH:
-                setState(State.DOUBLE_PUNCH_EASE);
-                break;
-            case BACKUP_KICK:
-                setState(State.BACKUP_KICK_EASE);
-                break;
-            case ROTATING_KICK:
-                setState(State.ROTATING_KICK_EASE);
-                break;
-            case BACK_KICK:
-                setState(State.BACK_KICK_EASE);
-                break;
+        adjustPosition();
+        setToStateFollowing(currentInput());
 
-            case WALL_JUMP:
-                cling();
-                setState(isLanded() ? State.GET_UP : State.ACTIVE_FALLING);
-                break;
-            case JUMP:
-            case AIR_UPPERCUT:
-            case AIR_SMASH:
-                cling();
-                setState(isLanded() ? State.GET_UP : State.FALLING);
-                break;
-            case SQUAT:
-            case SWEEPER:
-                setState(inputHandler.isPressed(InputHandler.Key.DOWN_KEY) ? State.SQUATTING : State.GET_UP);
-                break;
-            case IDLE:
-                setState(inputHandler.isPressed(InputHandler.Key.UP_KEY) ? State.JUMP : State.IDLE);
-                break;
-            case BACKUP_KICK_2:
-                addX(25);
-                setState(landingState());
-                break;
-            case UPPERCUT:
-                addX(15);
-                setState(landingState());
-                break;
-            case SLIDING_UPPERCUT:
-                addX(25);
-            default:
-                setState(landingState());
+        if (state == State.IDLE) {
+            if (moving) startRunning();
         }
     }
 
-    private State landingState() {
-        if (inputHandler.isPressed(InputHandler.Key.DOWN_KEY)) {
-            return State.SQUAT;
+    private void adjustPosition() {
+        switch (state) {
+            case BACKUP_KICK_2:
+                addX(25);
+                break;
+            case UPPERCUT:
+            case SLIDING_UPPERCUT:
+                addX(15);
+                break;
         }
-        else if (inputHandler.isPressed(InputHandler.Key.LEFT_KEY, InputHandler.Key.RIGHT_KEY)) {
-            return State.RUNNING;
-        }
-        return State.IDLE;
+    }
+
+    private FollowUps.MoveInput currentInput() {
+        if (goingDown) return FollowUps.MoveInput.DOWN;
+        if (jumping) return FollowUps.MoveInput.JUMP;
+        return FollowUps.MoveInput.NONE;
     }
 
     @Override

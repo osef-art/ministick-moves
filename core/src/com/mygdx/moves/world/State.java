@@ -28,7 +28,7 @@ public enum State {
     BACK_KICK_EASE("2backkick-e", 25_000_000, 6, true),
     LOW_KICK_EASE("nkick-e", 25_000_000, 6, true),
     PUNCH_EASE("npunch-e", 25_000_000, 6, true),
-    GET_UP("getup", 30_000_000, 4, true),
+    GET_UP("getup", 30_000_000, 4, 0),
     SQUAT("squat", 25_000_000, 8, 0),
     // TODO: SLIDE
 
@@ -37,7 +37,7 @@ public enum State {
     // PUNCHES
     PUNCH("npunch", 30_000_000, 6, 3, 3, new RelativeHitbox(30, 60, 30, 15, 5, 0)),
     REVERSE_PUNCH("n2punch", 50_000_000, 10, 4, 5, new RelativeHitbox(30, 60, 40, 20, 7.5f, 0)),
-    ENHANCED_PUNCH("npunch", 60_000_000, 6, 3,  3, new RelativeHitbox(30, 60, 40, 20, 5, 0)),
+    ENHANCED_PUNCH("npunch", 75_000_000, 6, 3,  3, new RelativeHitbox(30, 60, 40, 20, 5, 0)),
     DOUBLE_PUNCH("s2punch", 50_000_000, 10, 5,  10, new RelativeHitbox(50, 60, 40, 20, 10, 0)),
     AIR_SMASH("dapunch", 50_000_000, 10, 5, 10, new RelativeHitbox(0, 20, 60, 60, 5, 50)),
     AIR_UPPERCUT("auppercut", 40_000_000, 10, 5, 10, new RelativeHitbox(-20, 120, 80, 70, 5, -30)),
@@ -296,7 +296,7 @@ public enum State {
           hitbox.vx() * s.dir(), hitbox.vy()
         );
     }
-    public Optional<State> getStateOn(FollowUps.MoveInput move) {
+    public Optional<State> getStateFollowing(FollowUps.MoveInput move) {
         return Optional.ofNullable(followUps.on(move));
     }
 }
