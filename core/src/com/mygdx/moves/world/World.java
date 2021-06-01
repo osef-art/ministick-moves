@@ -13,10 +13,11 @@ import static com.mygdx.moves.MainScreen.sra;
 
 public class World implements Animated {
     private final Ministick ministick = new Ministick();
+    private final static float wallWidth = 50;
     private static final ArrayList<Hitbox> hitboxes = new ArrayList<>();
-    public static final Rectangle leftWall = new Rectangle(-25, 0, 50, 480);
-    public static final Rectangle rightWall = new Rectangle(480-25, 0, 50, 480);
-    public static final Rectangle ground = new Rectangle(-25, 480-25, 580, 150);
+    public static final Rectangle leftWall = new Rectangle( - wallWidth / 2, 0, wallWidth, Gdx.graphics.getHeight());
+    public static final Rectangle rightWall = new Rectangle(Gdx.graphics.getHeight() - wallWidth / 2, 0, wallWidth, Gdx.graphics.getHeight());
+    public static final Rectangle ground = new Rectangle( - wallWidth / 2, Gdx.graphics.getHeight() - wallWidth / 2, Gdx.graphics.getWidth(), 100);
     private final Object box = new Object(280, 240, 50, 50, 0.25f);
 
     public World() {

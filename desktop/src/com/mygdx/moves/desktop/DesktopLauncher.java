@@ -9,8 +9,8 @@ public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.title = "ministick moves";
-		config.width = 480;
-		config.height = 480;
+		config.width = 720;
+		config.height = 720;
 //		config.vSyncEnabled = true;
 		config.pauseWhenMinimized = true;
 		config.pauseWhenBackground = true;
