@@ -58,7 +58,7 @@ public class InputHandler implements InputProcessor {
                     actor.startJumping();
                     break;
                 case DOWN_KEY:
-                    actor.squat();
+                    actor.startGoingDown();
                     break;
                 case PUNCH_KEY:
                     if (isPressed(Key.DOWN_KEY)) actor.downPunch();
@@ -91,7 +91,7 @@ public class InputHandler implements InputProcessor {
                     actor.stopJumping();
                     break;
                 case DOWN_KEY:
-                    actor.getUp();
+                    actor.stopGoingDown();
                     break;
             }
         });

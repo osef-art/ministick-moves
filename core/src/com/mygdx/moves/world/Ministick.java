@@ -2,13 +2,11 @@ package com.mygdx.moves.world;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.mygdx.moves.controller.InputHandler;
 import com.mygdx.moves.renderer.AnimatedSprite;
 import com.mygdx.moves.sound.SoundStream;
 
 import java.util.Arrays;
 
-import static com.mygdx.moves.MainScreen.inputHandler;
 import static com.mygdx.moves.MainScreen.spra;
 import static com.mygdx.moves.world.World.*;
 
@@ -17,7 +15,9 @@ public class Ministick extends Object {
     private final Sprite star = new Sprite(new Texture("android/assets/icons/star.png"));
     private AnimatedSprite sprite;
     private boolean lookingLeft;
-    private boolean jumpMode;
+    private boolean goingDown;
+    private boolean jumping;
+    private boolean moving;
     private State state;
 
     public Ministick() {
@@ -113,45 +113,34 @@ public class Ministick extends Object {
     }
 
     public void startRunning() {
+        moving = true;
         if (stateIs(State.IDLE)) setState(State.RUNNING);
     }
 
     public void stopRunning() {
+        moving = false;
         if (stateIs(State.RUNNING)) setState(State.IDLE);
     }
 
     public void startJumping() {
-        jumpMode = true;
+        jumping = true;
         jump();
     }
 
     public void stopJumping() {
-        jumpMode = false;
+        jumping = false;
     }
 
-    private void jump() {
-        if (stateIs(State.JUMP, State.WALL_JUMP)) return;
-        setToFollowingStateOn(FollowUps.MoveInput.JUMP, "jump");
-
-        switch (state) {
-            case WALL_JUMP:
-                lookingLeft = !lookingLeft;
-                setYAcc(-20);
-                addXAcc(15);
-                addX((int) size.x / 4);
-                break;
-            case JUMP:
-                addAcc(0, -30);
-        }
+    public void startGoingDown() {
+        goingDown = true;
+        setToStateFollowingIfOver(FollowUps.MoveInput.DOWN);
     }
 
-    public void squat() {
-        setToFollowingStateOn(FollowUps.MoveInput.DOWN);
+    public void stopGoingDown() {
+        goingDown = false;
+        if (stateIs(State.SQUATTING)) setState(State.GET_UP);
     }
 
-    public void getUp() {
-        if (state == State.SQUATTING) setState(State.GET_UP);
-    }
 
     // attacks
 
