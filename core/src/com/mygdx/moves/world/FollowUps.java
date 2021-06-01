@@ -36,12 +36,15 @@ public class FollowUps {
     }
 
     public void isEase() {
+        onDown(State.SQUAT);
         onRelease(State.IDLE);
     }
 
     public void isAerial() {
         states.putIfAbsent(MoveInput.SIDE_PUNCH, states.get(MoveInput.PUNCH));
         states.putIfAbsent(MoveInput.SIDE_KICK, states.get(MoveInput.KICK));
+        onDown(State.FALLING);
+        onJump(State.FALLING);
         onRelease(State.FALLING);
     }
 

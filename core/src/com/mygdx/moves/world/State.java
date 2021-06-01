@@ -118,7 +118,8 @@ public enum State {
         SQUATTING.followUps
           .onDownPunch(UPPERCUT)
           .onDownKick(SWEEPER)
-          .onRelease(GET_UP);
+          .onJump(JUMP)
+          .onRelease(GET_UP)
         ;
 
         ACTIVE_FALLING.followUps
@@ -135,14 +136,14 @@ public enum State {
           .onDownPunch(UPPERCUT)
           .onDownKick(SWEEPER)
           .onDown(SQUATTING)
-          .onRelease(GET_UP);
+          .onRelease(GET_UP)
         ;
 
         JUMP.followUps
           .onKick(AIR_KICK)
           .onPunch(AIR_UPPERCUT)
           .onDownPunch(AIR_SMASH)
-          .isAerial();
+          .isAerial()
         ;
 
         WALL_JUMP.followUps
@@ -172,7 +173,7 @@ public enum State {
 
         SLIDING_UPPERCUT.followUps.onRelease(IDLE);
 
-        UPPERCUT.followUps.onRelease(SQUATTING);
+        UPPERCUT.followUps.onRelease(IDLE);
 
         AIR_UPPERCUT.followUps.isAerial();
 
@@ -182,7 +183,8 @@ public enum State {
         LOW_KICK.followUps
           .onPunch(REVERSE_PUNCH)
           .onSidePunch(REVERSE_PUNCH)
-          .onRelease(LOW_KICK_EASE);
+          .onRelease(LOW_KICK_EASE)
+        ;
 
         SIDE_KICK.followUps
           .onSideKick(BACK_KICK)
@@ -208,8 +210,10 @@ public enum State {
         BACKUP_KICK_2.followUps.onRelease(IDLE);
 
         SWEEPER.followUps
+          .onDown(SQUATTING)
           .onDownPunch(UPPERCUT)
-          .onRelease(SQUATTING);
+          .onRelease(GET_UP)
+        ;
 
         AIR_KICK.followUps.isAerial();
 
@@ -226,7 +230,12 @@ public enum State {
 
         PUNCH_EASE.followUps.isEase();
 
-        GET_UP.followUps.isEase();
+        GET_UP.followUps
+          .onSide(RUNNING)
+          .onDown(SQUAT)
+          .onJump(JUMP)
+          .isEase()
+        ;
 
         checkAutomataValidity();
     }
